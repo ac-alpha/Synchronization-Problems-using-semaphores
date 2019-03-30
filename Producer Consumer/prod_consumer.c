@@ -8,8 +8,8 @@
 #define MAX_MOD 100000
 #define NUM_ITER 200
 
-void *Producer(void *); /* Producer thread */
-void *Consumer(void *); /* Consumer thread */
+void *prod(void *); /* prod thread */
+void *cons(void *); /* cons thread */
 
 sem_t empty;            /* empty: How many empty buffer slots */
 sem_t full;             /* full: How many full buffer slots */
@@ -33,8 +33,8 @@ int main( int argc, char *argv[] ) {
 	// Create the threads
 	printf("main started\n");
 	for(int i = 0; i < N; i++) {	
-		pthread_create(&pid[N], NULL, Producer, NULL);
-		pthread_create(&cid[N], NULL, Consumer, NULL);
+		pthread_create(&pid[N], NULL, prod, NULL);
+		pthread_create(&cid[N], NULL, cons, NULL);
 	}
 	// And wait for them to finish.
 	for(int i = 0; i < N; i++) {
@@ -47,7 +47,7 @@ int main( int argc, char *argv[] ) {
 }
 
 
-void *Producer(void *arg) {
+void *prod(void *arg) {
 	int i=0, j;
 
 	while(i < NUM_ITER) {
@@ -61,7 +61,7 @@ void *Producer(void *arg) {
 		
 		// Check if there is content there already. If so, print a warning and exit.
 		if(g_data[g_idx] == 1) { 
-			printf("Producer overwrites!, idx er %d\n",g_idx); 
+			printf("prod overwrites!, idx er %d\n",g_idx); 
 			exit(0); 
 		}
 		
@@ -70,7 +70,7 @@ void *Producer(void *arg) {
 		g_idx++;
 		
 		// Print buffer status.
-		j=0; printf("(Producer, idx is %d): ",g_idx);
+		j=0; printf("(prod, idx is %d): ",g_idx);
 		while(j < g_idx) { j++; printf("="); } printf("\n");
 		
 		// Leave region with exlusive access
@@ -85,7 +85,7 @@ void *Producer(void *arg) {
 }
 
 
-void *Consumer(void *arg) {
+void *cons(void *arg) {
 	int i=0, j;
 
 	while(i < NUM_ITER) {
@@ -108,7 +108,7 @@ void *Consumer(void *arg) {
 		g_idx--;
 		
 		// Print the current buffer status
-		j=0; printf("(Consumer, idx is %d): ",g_idx);
+		j=0; printf("(cons, idx is %d): ",g_idx);
 		while(j < g_idx) { j++; printf("="); } printf("\n");
 		
 		// Leave region with exclusive access
